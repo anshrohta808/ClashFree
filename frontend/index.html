@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClashFree - Timetable Conflict Detector</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ClashFree</h1>
+            <p class="subtitle">College Timetable Conflict Detector</p>
+        </header>
+
+        <section id="step1" class="step active">
+            <h2>Step 1: Upload Timetable CSV</h2>
+            <div class="upload-area">
+                <input type="file" id="csvFile" accept=".csv" hidden>
+                <button type="button" id="uploadBtn" class="btn primary" onclick="document.getElementById('csvFile').click()">Choose CSV File</button>
+                <span id="fileName">No file chosen</span>
+            </div>
+            <div id="uploadStatus" class="status"></div>
+            <details id="warningsBox" class="collapsible" hidden>
+                <summary>Skipped/Warning Rows</summary>
+                <ul id="warningsList"></ul>
+            </details>
+        </section>
+
+        <section id="step2" class="step" hidden>
+            <h2>Step 2: Select Batches & Mode</h2>
+            <div class="batch-filter">
+                <input type="text" id="batchFilter" placeholder="Filter batches..." oninput="filterBatches()">
+            </div>
+            <div class="batch-list" id="batchList"></div>
+            <div class="mode-toggle">
+                <label><input type="radio" name="mode" value="single" checked> I'm one student (single)</label>
+                <label><input type="radio" name="mode" value="group"> Group meeting: find common free slot</label>
+            </div>
+            <button type="button" class="btn primary" onclick="applySelection()">Apply Selection</button>
+            <div id="selectionClashes" class="clashes-box" hidden></div>
+        </section>
+
+        <section id="step3" class="step" hidden>
+            <h2>Step 3: Personal Events</h2>
+            <div id="noBatchMsg" class="warning">Select at least one batch in Step 2 to add personal events.</div>
+            
+            <form id="personalForm" class="event-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Subject</label>
+                        <input type="text" id="peSubject" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Type</label>
+                        <select id="peType">
+                            <option value="lecture">Lecture</option>
+                            <option value="lab">Lab</option>
+                            <option value="tutorial">Tutorial</option>
+                            <option value="on_campus">On Campus Event</option>
+                            <option value="off_campus">Off Campus Event</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Faculty</label>
+                        <input type="text" id="peFaculty">
+                    </div>
+                    <div class="form-group">
+                        <label>Room</label>
+                        <input type="text" id="peRoom">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Day</label>
+                        <select id="peDay">
+                            <option value="0">Monday</option>
+                            <option value="1">Tuesday</option>
+                            <option value="2">Wednesday</option>
+                            <option value="3">Thursday</option>
+                            <option value="4">Friday</option>
+                            <option value="5">Saturday</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Start Slot</label>
+                        <select id="peStartSlot"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Slots (1-3)</label>
+                        <select id="peNumSlots">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="peCustomTime"> Custom time (any start/end)
+                    </label>
+                </div>
+                <div id="customTimeFields" hidden>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Start (HH:MM 24h)</label>
+                            <input type="text" id="peCustomStart" placeholder="e.g. 09:30">
+                        </div>
+                        <div class="form-group">
+                            <label>End (HH:MM 24h)</label>
+                            <input type="text" id="peCustomEnd" placeholder="e.g. 11:00">
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn primary">Add Personal Event</button>
+            </form>
+            
+            <div id="addConflict" class="conflict-box" hidden></div>
+        </section>
+
+        <section id="step4" class="step" hidden>
+            <h2>Events</h2>
+            <table id="eventsTable">
+                <thead>
+                    <tr>
+                        <th>Day</th>
+                        <th>Time</th>
+                        <th>Subject</th>
+                        <th>Type</th>
+                        <th>Faculty</th>
+                        <th>Room</th>
+                        <th>Batch</th>
+                        <th>Source</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+
+        <section id="step5" class="step" hidden>
+            <h2>Find Common Free Slot</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Number of Slots</label>
+                    <select id="cfSlots">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                    </select>
+                </div>
+                <button type="button" class="btn primary" onclick="findCommonFree()">Find Common Free Slot</button>
+            </div>
+            <div id="commonFreeResults" class="results-box" hidden></div>
+        </section>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
